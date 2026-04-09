@@ -1,7 +1,11 @@
 import logging
+import os
+import signal
 import sys
+import threading
 import time
 from datetime import date
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 import config
 from kalshi_client import KalshiClient
@@ -21,6 +25,48 @@ logging.basicConfig(
     ],
 )
 log = logging.getLogger("main")
+
+
+# ── Remote control server ─────────────────────────────────────────────
+
+class ControlHandler(BaseHTTPRequestHandler):
+    """Tiny HTTP handler that accepts POST /shutdown and POST /status."""
+
+    def do_POST(self):
+        if self.path == "/shutdown":
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"Shutting down...\n")
+            log.warning("Remote shutdown received — exiting")
+            # Kill the whole process after responding
+            threading.Thread(target=lambda: (time.sleep(0.5), os._exit(0)), daemon=True).start()
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def do_GET(self):
+        if self.path == "/status":
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(f"running | mode={config.TRADING_MODE}\n".encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def log_message(self, format, *args):
+        # Suppress default stderr logging; use our logger instead
+        log.debug("Control server: %s", format % args)
+
+
+def start_control_server():
+    """Run the control HTTP server in a daemon thread."""
+    server = HTTPServer((config.BOT_HOST, config.BOT_PORT), ControlHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    log.info("Control server listening on %s:%d", config.BOT_HOST, config.BOT_PORT)
+    return server
 
 
 def run_cycle(client: KalshiClient):
@@ -101,6 +147,9 @@ def main():
     except Exception:
         log.exception("Failed to connect to Kalshi API — check credentials")
         sys.exit(1)
+
+    # Start remote control server
+    start_control_server()
 
     log.info("Monitoring %d cities every %ds", len(config.CITIES), config.POLL_INTERVAL)
 

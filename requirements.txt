@@ -2,3 +2,8 @@ requests
 cryptography
 python-dotenv
 pytz
+rich
+pandas
+numpy
+matplotlib
+jupyter
