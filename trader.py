@@ -31,8 +31,8 @@ def save_trades(trades: list[dict]):
 
 
 def get_today_trades(series: str) -> list[dict]:
-    """Return trades matching this series ticker and today's date."""
-    today_str = datetime.date.today().isoformat()
+    """Return trades matching this series ticker and today's date (UTC)."""
+    today_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
     trades = load_trades()
     return [
         t for t in trades

@@ -165,15 +165,15 @@ def build_balance_panel(balance_data: dict) -> Panel:
 
     # Kalshi returns balance in cents
     balance_cents = balance_data.get("balance", 0)
-    payout_cents = balance_data.get("payout", 0)
+    portfolio_value_cents = balance_data.get("portfolio_value", 0)
 
     table = Table(show_header=False, box=None, padding=(0, 2))
     table.add_column("label", style="dim")
     table.add_column("value", style="bold")
 
     table.add_row("Cash Balance", f"${balance_cents / 100:,.2f}")
-    table.add_row("Portfolio Payout", f"${payout_cents / 100:,.2f}")
-    table.add_row("Total Value", f"${(balance_cents + payout_cents) / 100:,.2f}")
+    table.add_row("Portfolio Value", f"${portfolio_value_cents / 100:,.2f}")
+    table.add_row("Total Value", f"${(balance_cents + portfolio_value_cents) / 100:,.2f}")
 
     return Panel(table, title="Portfolio", border_style="green")
 
@@ -406,8 +406,8 @@ def main():
     parser.add_argument("--interval", type=int, default=30, help="Refresh interval in seconds (default: 30)")
     parser.add_argument(
         "--bot-host", type=str,
-        default=os.getenv("BOT_HOST", "localhost"),
-        help="Hostname/IP of the machine running main.py (default: localhost or BOT_HOST env var)",
+        default=os.getenv("DASHBOARD_BOT_HOST", "localhost"),
+        help="Hostname/IP of the machine running main.py (default: localhost or DASHBOARD_BOT_HOST env var)",
     )
     parser.add_argument(
         "--bot-port", type=int,
@@ -460,6 +460,8 @@ def main():
                     sys.exit(0)
                 elif key == "k":
                     kill_msg = send_kill_signal(args.bot_host, args.bot_port)
+                    # Wait for the bot to finish shutting down (it exits after 0.5s)
+                    time.sleep(1)
                     bot_status = check_bot_status(args.bot_host, args.bot_port)
                     live.update(build_dashboard(client, bot_status, kill_msg))
 

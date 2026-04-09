@@ -19,6 +19,6 @@ def should_enter(
     return (
         local_hour >= config.ENTRY_HOUR_LOCAL
         and config.ENTRY_MIN <= yes_price_cents <= config.ENTRY_MAX
-        and humidity < config.MAX_HUMIDITY
-        and cloud_cover < config.MAX_CLOUD_COVER
+        and humidity <= config.MAX_HUMIDITY
+        and cloud_cover <= config.MAX_CLOUD_COVER
     )
