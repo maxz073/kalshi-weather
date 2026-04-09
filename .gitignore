@@ -1,0 +1,7 @@
+.env
+trades.json
+*.pem
+kalshi_key.pem
+__pycache__/
+*.log
+.DS_Store
