@@ -88,5 +88,5 @@ def execute_trade(
             "[LIVE] %s | %s | %d contracts @ %dc | fee %dc",
             city_name, ticker, contracts, yes_price_cents, fee,
         )
-        client.post_market_order(ticker, "yes", contracts)
+        client.post_market_order(ticker, "yes", contracts, yes_price_cents=yes_price_cents)
         record_trade(trade_data)

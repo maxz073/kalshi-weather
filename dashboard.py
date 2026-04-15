@@ -8,8 +8,6 @@ Usage:
 """
 
 import argparse
-import json
-import os
 import select
 import sys
 import termios
@@ -27,9 +25,8 @@ from rich.table import Table
 from rich.text import Text
 
 import config
-from kalshi_client import KalshiClient
+from kalshi_client import KalshiClient, compute_microprice
 
-TRADES_FILE = "trades.json"
 ALERT_THRESHOLD = 60  # cents — flag positions whose YES price drops below this
 
 
@@ -126,15 +123,14 @@ def fetch_market_price(client: KalshiClient, ticker: str) -> dict | None:
         return None
 
 
-def load_trades() -> list[dict]:
-    if not os.path.exists(TRADES_FILE):
-        return []
+def fetch_microprice(client: KalshiClient, ticker: str, market: dict | None = None) -> int | None:
+    """Fetch orderbook and compute microprice for a ticker. Returns cents or None."""
     try:
-        with open(TRADES_FILE, "r") as f:
-            data = f.read()
-            return json.loads(data) if data.strip() else []
-    except (json.JSONDecodeError, OSError):
-        return []
+        orderbook = client.get_orderbook(ticker)
+        return compute_microprice(orderbook, market)
+    except Exception:
+        return None
+
 
 
 # ── Panel builders ────────────────────────────────────────────────────
@@ -178,7 +174,7 @@ def build_balance_panel(balance_data: dict) -> Panel:
     return Panel(table, title="Portfolio", border_style="green")
 
 
-def build_positions_panel(positions: list[dict], market_prices: dict) -> Panel:
+def build_positions_panel(positions: list[dict], market_prices: dict, microprices: dict | None = None) -> Panel:
     if positions and "error" in positions[0]:
         return Panel(Text(f"Error: {positions[0]['error']}", style="red"), title="Open Positions")
 
@@ -190,45 +186,46 @@ def build_positions_panel(positions: list[dict], market_prices: dict) -> Panel:
     table.add_column("Side", justify="center")
     table.add_column("Qty", justify="right")
     table.add_column("Avg Price", justify="right")
-    table.add_column("Current", justify="right")
+    table.add_column("Fair Value", justify="right")
     table.add_column("P&L", justify="right")
     table.add_column("Status", justify="center")
 
     for pos in positions:
         ticker = pos.get("ticker", "?")
-        quantity = pos.get("total_traded", 0)
-        # Positions can have yes or no side quantities
-        yes_qty = pos.get("yes_number", 0)
-        no_qty = pos.get("no_number", 0)
 
-        if yes_qty > 0:
-            side = "YES"
-            qty = yes_qty
-        elif no_qty > 0:
-            side = "NO"
-            qty = no_qty
-        else:
+        # position_fp is positive for YES contracts, negative for NO
+        position_fp = int(float(pos.get("position_fp", 0)))
+        if not position_fp:
             continue  # no position
 
-        # Average entry from position data
-        resting_cost = pos.get("market_exposure", 0)  # cents total cost
+        if position_fp > 0:
+            side = "YES"
+            qty = position_fp
+        else:
+            side = "NO"
+            qty = abs(position_fp)
+
+        # market_exposure_dollars is the aggregate cost in dollars
+        resting_cost = round(float(pos.get("market_exposure_dollars", 0)) * 100)  # convert to cents
         avg_price = resting_cost / qty if qty else 0
 
-        # Current market price
-        mkt = market_prices.get(ticker)
-        if mkt:
-            if side == "YES":
-                current = mkt.get("yes_ask") or mkt.get("last_price") or 0
-            else:
-                current = mkt.get("no_ask") or (100 - (mkt.get("last_price") or 0))
+        # Current value: use microprice if available, fall back to bid
+        mp = (microprices or {}).get(ticker)
+        if mp is not None and side == "YES":
+            current = mp
         else:
-            current = 0
+            mkt = market_prices.get(ticker)
+            if mkt:
+                if side == "YES":
+                    raw = mkt.get("yes_bid_dollars") or mkt.get("last_price_dollars") or "0"
+                else:
+                    raw = mkt.get("no_bid_dollars") or "0"
+                current = round(float(raw) * 100)
+            else:
+                current = 0
 
         # P&L estimate (current value - cost)
-        if side == "YES":
-            current_value = current * qty
-        else:
-            current_value = current * qty
+        current_value = current * qty
         pnl = current_value - resting_cost if resting_cost else 0
 
         # Style P&L
@@ -240,12 +237,15 @@ def build_positions_panel(positions: list[dict], market_prices: dict) -> Panel:
             pnl_text = Text(f"${pnl / 100:,.2f}", style="dim")
 
         # Alert if price below threshold
-        if current > 0 and current < ALERT_THRESHOLD:
+        if current == 0:
+            status = Text("NO BID", style="bold red")
+            current_text = Text("—", style="bold red")
+        elif current < ALERT_THRESHOLD:
             status = Text("BELOW 60", style="bold red")
             current_text = Text(f"{current}c", style="bold red")
         else:
             status = Text("OK", style="green")
-            current_text = Text(f"{current}c" if current else "—", style="white")
+            current_text = Text(f"{current}c", style="white")
 
         side_style = "green" if side == "YES" else "red"
 
@@ -262,37 +262,47 @@ def build_positions_panel(positions: list[dict], market_prices: dict) -> Panel:
     return Panel(table, title="Open Positions", border_style="blue")
 
 
-def build_alerts_panel(positions: list[dict], market_prices: dict) -> Panel:
+def build_alerts_panel(positions: list[dict], market_prices: dict, microprices: dict | None = None) -> Panel:
     alerts = []
 
     if positions and "error" not in positions[0]:
         for pos in positions:
             ticker = pos.get("ticker", "?")
-            yes_qty = pos.get("yes_number", 0)
-            no_qty = pos.get("no_number", 0)
-            if yes_qty == 0 and no_qty == 0:
+            position_fp = int(float(pos.get("position_fp", 0)))
+            if not position_fp:
                 continue
 
             mkt = market_prices.get(ticker)
-            if not mkt:
-                continue
+            mp = (microprices or {}).get(ticker)
 
-            if yes_qty > 0:
-                price = mkt.get("yes_ask") or mkt.get("last_price") or 0
-                if 0 < price < ALERT_THRESHOLD:
+            if position_fp > 0:
+                if mp is not None:
+                    price = mp
+                elif mkt:
+                    raw = mkt.get("yes_bid_dollars") or mkt.get("last_price_dollars") or "0"
+                    price = round(float(raw) * 100)
+                else:
+                    continue
+                if price < ALERT_THRESHOLD:
+                    label = f"{price}c" if price > 0 else "NO BID"
                     alerts.append(
                         Text.assemble(
                             ("  WARNING  ", "bold white on red"),
-                            (f"  {ticker}  YES @ {price}c — below {ALERT_THRESHOLD}c threshold", "red"),
+                            (f"  {ticker}  YES @ {label} — below {ALERT_THRESHOLD}c threshold", "red"),
                         )
                     )
-            if no_qty > 0:
-                price = mkt.get("no_ask") or (100 - (mkt.get("last_price") or 0))
-                if 0 < price < ALERT_THRESHOLD:
+            else:
+                if mkt:
+                    raw = mkt.get("no_bid_dollars") or "0"
+                    price = round(float(raw) * 100)
+                else:
+                    continue
+                if price < ALERT_THRESHOLD:
+                    label = f"{price}c" if price > 0 else "NO BID"
                     alerts.append(
                         Text.assemble(
                             ("  WARNING  ", "bold white on red"),
-                            (f"  {ticker}  NO @ {price}c — below {ALERT_THRESHOLD}c threshold", "red"),
+                            (f"  {ticker}  NO @ {label} — below {ALERT_THRESHOLD}c threshold", "red"),
                         )
                     )
 
@@ -307,52 +317,6 @@ def build_alerts_panel(positions: list[dict], market_prices: dict) -> Panel:
     return Panel(content, title="Alerts", border_style="red" if alerts else "green")
 
 
-def build_trades_panel() -> Panel:
-    trades = load_trades()
-    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    today_trades = [t for t in trades if t.get("timestamp", "").startswith(today_str)]
-
-    if not today_trades:
-        return Panel(Text("No trades today", style="dim"), title="Today's Trades", border_style="yellow")
-
-    table = Table(show_header=True, header_style="bold", expand=True)
-    table.add_column("Time (UTC)", style="dim", no_wrap=True)
-    table.add_column("City")
-    table.add_column("Ticker", style="cyan", no_wrap=True)
-    table.add_column("Qty", justify="right")
-    table.add_column("Price", justify="right")
-    table.add_column("Fee", justify="right")
-    table.add_column("Mode", justify="center")
-
-    for t in today_trades[-10:]:  # show last 10
-        ts = t.get("timestamp", "")
-        time_str = ts[11:19] if len(ts) > 19 else ts
-        mode_style = "green" if t.get("mode") == "paper" else "red"
-        table.add_row(
-            time_str,
-            t.get("city", "?"),
-            t.get("ticker", "?"),
-            str(t.get("contracts", 0)),
-            f"{t.get('entry_price_cents', 0)}c",
-            f"{t.get('fee_cents', 0)}c",
-            Text(t.get("mode", "?").upper(), style=mode_style),
-        )
-
-    total_contracts = sum(t.get("contracts", 0) for t in today_trades)
-    total_cost = sum(t.get("entry_price_cents", 0) * t.get("contracts", 0) for t in today_trades)
-    total_fees = sum(t.get("fee_cents", 0) for t in today_trades)
-
-    table.add_section()
-    table.add_row(
-        "", "TOTAL", "",
-        str(total_contracts),
-        f"${total_cost / 100:,.2f}",
-        f"${total_fees / 100:,.2f}",
-        "",
-    )
-
-    return Panel(table, title="Today's Trades", border_style="yellow")
-
 
 # ── Main dashboard ────────────────────────────────────────────────────
 
@@ -362,8 +326,9 @@ def build_dashboard(client: KalshiClient, bot_status: str, kill_msg: str = "") -
     balance_data = fetch_balance(client)
     positions = fetch_positions(client)
 
-    # Fetch current prices for all open positions
+    # Fetch current prices and microprices for all open positions
     market_prices = {}
+    microprices = {}
     for pos in positions:
         if isinstance(pos, dict) and "error" not in pos:
             ticker = pos.get("ticker", "")
@@ -371,13 +336,15 @@ def build_dashboard(client: KalshiClient, bot_status: str, kill_msg: str = "") -
                 mkt = fetch_market_price(client, ticker)
                 if mkt:
                     market_prices[ticker] = mkt
+                mp = fetch_microprice(client, ticker, mkt)
+                if mp is not None:
+                    microprices[ticker] = mp
 
     layout = Layout()
     layout.split_column(
         Layout(name="header", size=3),
         Layout(name="top", size=9),
-        Layout(name="middle"),
-        Layout(name="bottom"),
+        Layout(name="middle", minimum_size=8, ratio=1),
     )
     layout["top"].split_row(
         Layout(name="balance"),
@@ -393,10 +360,9 @@ def build_dashboard(client: KalshiClient, bot_status: str, kill_msg: str = "") -
             Panel(Text(kill_msg, style="bold yellow"), title="Kill Signal", border_style="yellow")
         )
     else:
-        layout["alerts"].update(build_alerts_panel(positions, market_prices))
+        layout["alerts"].update(build_alerts_panel(positions, market_prices, microprices))
 
-    layout["middle"].update(build_positions_panel(positions, market_prices))
-    layout["bottom"].update(build_trades_panel())
+    layout["middle"].update(build_positions_panel(positions, market_prices, microprices))
 
     return layout
 
@@ -406,8 +372,8 @@ def main():
     parser.add_argument("--interval", type=int, default=30, help="Refresh interval in seconds (default: 30)")
     parser.add_argument(
         "--bot-host", type=str,
-        default=os.getenv("DASHBOARD_BOT_HOST", "localhost"),
-        help="Hostname/IP of the machine running main.py (default: localhost or DASHBOARD_BOT_HOST env var)",
+        default=config.BOT_CONNECT_HOST,
+        help=f"Hostname/IP of the machine running main.py (default: {config.BOT_CONNECT_HOST} from BOT_CONNECT_HOST env var)",
     )
     parser.add_argument(
         "--bot-port", type=int,

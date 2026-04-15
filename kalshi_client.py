@@ -14,6 +14,47 @@ import config
 log = logging.getLogger(__name__)
 
 
+def compute_microprice(orderbook: dict, market: dict | None = None) -> int | None:
+    """Compute the microprice (liquidity-weighted mid) from an orderbook.
+
+    microprice = (best_bid * best_ask_size + best_ask * best_bid_size)
+                 / (best_bid_size + best_ask_size)
+
+    If the orderbook is one-sided, falls back to the market's yes_bid/yes_ask
+    to reconstruct the missing side (size assumed equal to the known side).
+
+    Returns price in cents, or None if neither orderbook nor market data suffice.
+    """
+    yes_bids = orderbook.get("yes", [])
+    no_bids = orderbook.get("no", [])
+
+    best_bid_price = yes_bids[0][0] if yes_bids else None
+    best_bid_size = yes_bids[0][1] if yes_bids else None
+    # YES ask = 100 - best NO bid (Kalshi complementary pricing)
+    best_ask_price = (100 - no_bids[0][0]) if no_bids else None
+    best_ask_size = no_bids[0][1] if no_bids else None
+
+    # Fill missing sides from market data if available
+    if market and best_bid_price is None:
+        raw = market.get("yes_bid_dollars")
+        if raw is not None:
+            best_bid_price = round(float(raw) * 100)
+            best_bid_size = best_ask_size or 1  # assume equal weight
+    if market and best_ask_price is None:
+        raw = market.get("yes_ask_dollars")
+        if raw is not None:
+            best_ask_price = round(float(raw) * 100)
+            best_ask_size = best_bid_size or 1  # assume equal weight
+
+    if best_bid_price is None or best_ask_price is None:
+        return None
+    if best_bid_size + best_ask_size == 0:
+        return None
+
+    microprice = (best_bid_price * best_ask_size + best_ask_price * best_bid_size) / (best_bid_size + best_ask_size)
+    return round(microprice)
+
+
 class KalshiClient:
     """Synchronous Kalshi HTTP API client with RSA-PSS auth."""
 
@@ -90,8 +131,20 @@ class KalshiClient:
         headers = self._signed_headers("POST", endpoint)
         log.debug("POST %s data=%s", url, data)
         resp = requests.post(url, headers=headers, json=data)
+        if not resp.ok:
+            log.error("POST %s → %d: %s", url, resp.status_code, resp.text)
         resp.raise_for_status()
         return resp.json()
+
+    def delete(self, endpoint: str) -> dict:
+        url = self.api_base + endpoint
+        headers = self._signed_headers("DELETE", endpoint)
+        log.debug("DELETE %s", url)
+        resp = requests.delete(url, headers=headers)
+        if not resp.ok:
+            log.error("DELETE %s → %d: %s", url, resp.status_code, resp.text)
+        resp.raise_for_status()
+        return resp.json() if resp.text.strip() else {}
 
     # ── domain helpers ────────────────────────────────────────────────
 
@@ -103,7 +156,7 @@ class KalshiClient:
         data = self.get(f"/markets/{ticker}")
         return data["market"]
 
-    def post_market_order(self, ticker: str, side: str, count: int) -> dict:
+    def post_market_order(self, ticker: str, side: str, count: int, yes_price_cents: int | None = None) -> dict:
         body = {
             "action": "buy",
             "ticker": ticker,
@@ -112,10 +165,28 @@ class KalshiClient:
             "type": "market",
             "client_order_id": uuid.uuid4().hex,
         }
+        if yes_price_cents is not None:
+            body["yes_price"] = yes_price_cents
         return self.post("/portfolio/orders", body)
+
+    def get_orderbook(self, ticker: str) -> dict:
+        """Fetch the orderbook for a market. Returns {"yes": [...], "no": [...]}."""
+        data = self.get(f"/markets/{ticker}/orderbook")
+        return data.get("orderbook", data)
 
     def get_balance(self) -> dict:
         return self.get("/portfolio/balance")
 
     def get_positions(self) -> dict:
-        return self.get("/portfolio/positions")
+        all_positions = []
+        cursor = None
+        while True:
+            params = {"limit": 200, "settlement_status": "unsettled"}
+            if cursor:
+                params["cursor"] = cursor
+            data = self.get("/portfolio/positions", params=params)
+            all_positions.extend(data.get("market_positions", []))
+            cursor = data.get("cursor")
+            if not cursor:
+                break
+        return {"market_positions": all_positions}

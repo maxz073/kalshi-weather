@@ -62,10 +62,15 @@ class ControlHandler(BaseHTTPRequestHandler):
 
 def start_control_server():
     """Run the control HTTP server in a daemon thread."""
-    server = HTTPServer((config.BOT_HOST, config.BOT_PORT), ControlHandler)
+    try:
+        server = HTTPServer((config.BOT_BIND_HOST, config.BOT_PORT), ControlHandler)
+    except OSError as e:
+        log.error("Cannot start control server on %s:%d — %s", config.BOT_BIND_HOST, config.BOT_PORT, e)
+        log.error("Dashboard kill/status will not work. Is another instance running?")
+        return None
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
-    log.info("Control server listening on %s:%d", config.BOT_HOST, config.BOT_PORT)
+    log.info("Control server listening on %s:%d", config.BOT_BIND_HOST, config.BOT_PORT)
     return server
 
 
@@ -90,7 +95,7 @@ def run_cycle(client: KalshiClient):
 
             # 3. Discover markets & find qualifying price
             markets = discover_city_markets(client, series, today)
-            entry_market = find_entry_market(markets)
+            entry_market = find_entry_market(client, markets)
             if entry_market is None:
                 log.debug("%-16s  skip — no market with YES ask in %d-%d¢", city_name, config.ENTRY_MIN, config.ENTRY_MAX)
                 continue
@@ -115,7 +120,13 @@ def run_cycle(client: KalshiClient):
                 )
                 continue
 
-            # 6. Trade
+            # 6. Existing position check
+            positions = client.get_positions().get("market_positions", [])
+            if any(p.get("ticker") == ticker and int(float(p.get("position_fp", 0))) != 0 for p in positions):
+                log.info("%-16s  skip — already have a position in %s", city_name, ticker)
+                continue
+
+            # 7. Trade
             log.info(
                 "%-16s  ENTRY — %s  price=%d¢  humidity=%.0f%%  cloud=%.0f%%",
                 city_name, ticker, yes_price, humidity, cloud_cover,

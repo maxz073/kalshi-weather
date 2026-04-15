@@ -13,14 +13,15 @@ KALSHI_API_BASE = "https://api.elections.kalshi.com/trade-api/v2"
 TRADING_MODE = os.getenv("TRADING_MODE", "paper")  # "paper" or "live"
 
 # ── Remote control (bot exposes this; dashboard connects to it) ──
-BOT_HOST = os.getenv("BOT_HOST", "0.0.0.0")   # bind address for the bot's control server
+BOT_BIND_HOST = os.getenv("BOT_BIND_HOST", "0.0.0.0")   # bind address for the bot's control server
+BOT_CONNECT_HOST = os.getenv("BOT_CONNECT_HOST", "localhost")  # address the dashboard uses to reach the bot
 BOT_PORT = int(os.getenv("BOT_PORT", "8377"))  # port for the bot's control server
 
 # ── Strategy parameters ──
 ENTRY_MIN = 92   # cents (YES price lower bound)
 ENTRY_MAX = 96   # cents (YES price upper bound)
 ENTRY_HOUR_LOCAL = 16  # 4 PM local
-MAX_CONTRACTS = 1
+MAX_CONTRACTS = 50
 POLL_INTERVAL = 60  # 1 minute in seconds
 
 # ── Weather thresholds ──
