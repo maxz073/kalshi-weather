@@ -12,7 +12,7 @@ from kalshi_client import KalshiClient
 from market_discovery import discover_city_markets, find_entry_market
 from weather_client import get_current_weather
 from strategy import get_local_hour, should_enter
-from trader import get_today_contract_count, execute_trade
+from trader import execute_trade
 
 # ── Logging ───────────────────────────────────────────────────────────
 
@@ -87,13 +87,7 @@ def run_cycle(client: KalshiClient):
                 log.debug("%-16s  skip — local hour %d < %d", city_name, local_hour, config.ENTRY_HOUR_LOCAL)
                 continue
 
-            # 2. Daily limit check
-            already = get_today_contract_count(series)
-            if already >= config.MAX_CONTRACTS:
-                log.debug("%-16s  skip — already %d contracts today", city_name, already)
-                continue
-
-            # 3. Discover markets & find qualifying price
+            # 2. Discover markets & find qualifying price
             markets = discover_city_markets(client, series, today)
             entry_market = find_entry_market(client, markets)
             if entry_market is None:
@@ -103,7 +97,7 @@ def run_cycle(client: KalshiClient):
             ticker = entry_market["ticker"]
             yes_price = entry_market["yes_ask"]
 
-            # 4. Weather check
+            # 3. Weather check
             weather = get_current_weather(lat, lon)
             if weather is None:
                 log.warning("%-16s  skip — weather data unavailable", city_name)
@@ -112,7 +106,7 @@ def run_cycle(client: KalshiClient):
             humidity = weather["humidity"]
             cloud_cover = weather["cloud_cover"]
 
-            # 5. Entry evaluation
+            # 4. Entry evaluation
             if not should_enter(local_hour, yes_price, humidity, cloud_cover):
                 log.info(
                     "%-16s  no entry — price=%d¢  humidity=%.0f%%  cloud=%.0f%%",
@@ -120,18 +114,25 @@ def run_cycle(client: KalshiClient):
                 )
                 continue
 
-            # 6. Existing position check
+            # 5. Inventory check — buy only what's needed to reach MAX_POSITION_SIZE
             positions = client.get_positions().get("market_positions", [])
-            if any(p.get("ticker") == ticker and int(float(p.get("position_fp", 0))) != 0 for p in positions):
-                log.info("%-16s  skip — already have a position in %s", city_name, ticker)
+            current_qty = 0
+            for p in positions:
+                if p.get("ticker") == ticker:
+                    current_qty = int(float(p.get("position_fp", 0)))
+                    break
+
+            needed = config.MAX_POSITION_SIZE - current_qty
+            if needed <= 0:
+                log.info("%-16s  skip — already at max position (%d) in %s", city_name, current_qty, ticker)
                 continue
 
-            # 7. Trade
+            # 6. Trade
             log.info(
-                "%-16s  ENTRY — %s  price=%d¢  humidity=%.0f%%  cloud=%.0f%%",
-                city_name, ticker, yes_price, humidity, cloud_cover,
+                "%-16s  ENTRY — %s  qty=%d (have %d, target %d)  price=%d¢  humidity=%.0f%%  cloud=%.0f%%",
+                city_name, ticker, needed, current_qty, config.MAX_POSITION_SIZE, yes_price, humidity, cloud_cover,
             )
-            execute_trade(client, ticker, city_name, series, yes_price, mode)
+            execute_trade(client, ticker, city_name, series, yes_price, needed, mode)
 
         except Exception:
             log.exception("Error processing %s", city_name)

@@ -59,10 +59,10 @@ def execute_trade(
     city_name: str,
     series: str,
     yes_price_cents: int,
+    contracts: int,
     mode: str,
 ):
     """Execute (or paper-trade) a YES order and record it."""
-    contracts = config.MAX_CONTRACTS
     fee = config.kalshi_taker_fee(yes_price_cents, contracts)
 
     trade_data = {

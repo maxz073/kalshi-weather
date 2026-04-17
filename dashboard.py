@@ -205,8 +205,25 @@ def build_positions_panel(positions: list[dict], market_prices: dict, microprice
             side = "NO"
             qty = abs(position_fp)
 
-        # market_exposure_dollars is the aggregate cost in dollars
-        resting_cost = round(float(pos.get("market_exposure_dollars", 0)) * 100)  # convert to cents
+        # market_exposure_dollars is the aggregate cost — normally in dollars,
+        # but the API sometimes returns values already in cents.  Detect by
+        # checking whether treating it as dollars would give an avg price
+        # outside the valid 0-100c range for a binary contract.
+        raw_exposure = float(pos.get("market_exposure_dollars", 0))
+        resting_cost_as_dollars = round(abs(raw_exposure) * 100)        # assume dollars → cents
+        resting_cost_as_cents   = round(abs(raw_exposure))              # assume already cents
+
+        if qty:
+            avg_if_dollars = resting_cost_as_dollars / qty
+            # If interpreting as dollars gives a per-contract price > $1 (100c),
+            # the value is already in cents.
+            if avg_if_dollars > 100:
+                resting_cost = resting_cost_as_cents
+            else:
+                resting_cost = resting_cost_as_dollars
+        else:
+            resting_cost = resting_cost_as_dollars
+
         avg_price = resting_cost / qty if qty else 0
 
         # Current value: use microprice if available, fall back to bid

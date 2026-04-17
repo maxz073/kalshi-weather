@@ -1,0 +1,742 @@
+[
+  {
+    "ticker": "KXHIGHNY",
+    "city": "New York",
+    "target_date": "2026-04-17",
+    "forecast_mean": 76.1,
+    "model1_mu": 78.4,
+    "model1_sigma": 1.77,
+    "model2_mu": 77.3,
+    "model2_sigma": 7.49,
+    "model3_mu": 77.3,
+    "model3_sigma": 2.75,
+    "ensemble_mu": 78.4,
+    "ensemble_sigma": 1.92,
+    "ci_90_low": 75.2,
+    "ci_90_high": 81.5,
+    "weights": {
+      "forecast": 0.9750000238418579,
+      "historical": 0.008999999612569809,
+      "market": 0.017000000923871994
+    },
+    "bucket_probs": [
+      0.0,
+      0.0001,
+      0.1147,
+      0.8045,
+      0.0807,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      11,
+      80,
+      8,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHCHI",
+    "city": "Chicago",
+    "target_date": "2026-04-17",
+    "forecast_mean": 75.7,
+    "model1_mu": 77.4,
+    "model1_sigma": 2.04,
+    "model2_mu": 70.9,
+    "model2_sigma": 7.63,
+    "model3_mu": 77.0,
+    "model3_sigma": 3.19,
+    "ensemble_mu": 77.4,
+    "ensemble_sigma": 2.24,
+    "ci_90_low": 73.7,
+    "ci_90_high": 81.1,
+    "weights": {
+      "forecast": 0.9750000238418579,
+      "historical": 0.00800000037997961,
+      "market": 0.017000000923871994
+    },
+    "bucket_probs": [
+      0.0,
+      0.0015,
+      0.2297,
+      0.702,
+      0.0667,
+      0.0001
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      22,
+      69,
+      6,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHMIA",
+    "city": "Miami",
+    "target_date": "2026-04-17",
+    "forecast_mean": 81.5,
+    "model1_mu": 82.3,
+    "model1_sigma": 1.0,
+    "model2_mu": 83.6,
+    "model2_sigma": 4.59,
+    "model3_mu": 80.3,
+    "model3_sigma": 1.55,
+    "ensemble_mu": 82.3,
+    "ensemble_sigma": 1.13,
+    "ci_90_low": 80.4,
+    "ci_90_high": 84.1,
+    "weights": {
+      "forecast": 0.9779999852180481,
+      "historical": 0.009999999776482582,
+      "market": 0.013000000268220901
+    },
+    "bucket_probs": [
+      0.0,
+      0.0,
+      0.2451,
+      0.7548,
+      0.0001,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      24,
+      75,
+      1,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTBOS",
+    "city": "Boston",
+    "target_date": "2026-04-17",
+    "forecast_mean": 59.8,
+    "model1_mu": 60.5,
+    "model1_sigma": 1.85,
+    "model2_mu": 60.2,
+    "model2_sigma": 7.78,
+    "model3_mu": 61.3,
+    "model3_sigma": 2.6,
+    "ensemble_mu": 60.5,
+    "ensemble_sigma": 2.0,
+    "ci_90_low": 57.2,
+    "ci_90_high": 63.8,
+    "weights": {
+      "forecast": 0.9750000238418579,
+      "historical": 0.008999999612569809,
+      "market": 0.017000000923871994
+    },
+    "bucket_probs": [
+      0.0,
+      0.0023,
+      0.3665,
+      0.6161,
+      0.0152,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      36,
+      61,
+      1,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHLAX",
+    "city": "Los Angeles",
+    "target_date": "2026-04-17",
+    "forecast_mean": 77.6,
+    "model1_mu": 80.1,
+    "model1_sigma": 2.28,
+    "model2_mu": 69.9,
+    "model2_sigma": 5.03,
+    "model3_mu": 81.3,
+    "model3_sigma": 3.95,
+    "ensemble_mu": 80.0,
+    "ensemble_sigma": 2.5,
+    "ci_90_low": 75.9,
+    "ci_90_high": 84.1,
+    "weights": {
+      "forecast": 0.9760000109672546,
+      "historical": 0.007000000216066837,
+      "market": 0.017000000923871994
+    },
+    "bucket_probs": [
+      0.0,
+      0.0016,
+      0.1682,
+      0.6826,
+      0.1465,
+      0.0012
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      16,
+      68,
+      14,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHAUS",
+    "city": "Austin",
+    "target_date": "2026-04-17",
+    "forecast_mean": 86.4,
+    "model1_mu": 87.7,
+    "model1_sigma": 1.98,
+    "model2_mu": 85.4,
+    "model2_sigma": 5.0,
+    "model3_mu": 84.7,
+    "model3_sigma": 2.55,
+    "ensemble_mu": 87.6,
+    "ensemble_sigma": 2.08,
+    "ci_90_low": 84.2,
+    "ci_90_high": 91.0,
+    "weights": {
+      "forecast": 0.9750000238418579,
+      "historical": 0.00800000037997961,
+      "market": 0.017000000923871994
+    },
+    "bucket_probs": [
+      0.0,
+      0.0015,
+      0.2846,
+      0.6809,
+      0.033,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      28,
+      67,
+      3,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTSFO",
+    "city": "San Francisco",
+    "target_date": "2026-04-17",
+    "forecast_mean": 64.5,
+    "model1_mu": 65.2,
+    "model1_sigma": 1.96,
+    "model2_mu": 67.0,
+    "model2_sigma": 5.42,
+    "model3_mu": 64.1,
+    "model3_sigma": 2.56,
+    "ensemble_mu": 65.2,
+    "ensemble_sigma": 2.04,
+    "ci_90_low": 61.9,
+    "ci_90_high": 68.6,
+    "weights": {
+      "forecast": 0.9750000238418579,
+      "historical": 0.00800000037997961,
+      "market": 0.017000000923871994
+    },
+    "bucket_probs": [
+      0.0,
+      0.0027,
+      0.3683,
+      0.6122,
+      0.0168,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      36,
+      60,
+      2,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTDAL",
+    "city": "Dallas",
+    "target_date": "2026-04-17",
+    "forecast_mean": 83.3,
+    "model1_mu": 83.0,
+    "model1_sigma": 1.38,
+    "model2_mu": 84.7,
+    "model2_sigma": 4.83,
+    "model3_mu": 81.2,
+    "model3_sigma": 2.25,
+    "ensemble_mu": 83.0,
+    "ensemble_sigma": 1.49,
+    "ci_90_low": 80.5,
+    "ci_90_high": 85.4,
+    "weights": {
+      "forecast": 0.9760000109672546,
+      "historical": 0.009999999776482582,
+      "market": 0.014999999664723873
+    },
+    "bucket_probs": [
+      0.0,
+      0.001,
+      0.5997,
+      0.3991,
+      0.0002,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      59,
+      39,
+      1,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHPHIL",
+    "city": "Philadelphia",
+    "target_date": "2026-04-17",
+    "forecast_mean": 80.0,
+    "model1_mu": 80.8,
+    "model1_sigma": 1.53,
+    "model2_mu": 78.0,
+    "model2_sigma": 6.87,
+    "model3_mu": 79.6,
+    "model3_sigma": 2.24,
+    "ensemble_mu": 80.8,
+    "ensemble_sigma": 1.7,
+    "ci_90_low": 78.0,
+    "ci_90_high": 83.6,
+    "weights": {
+      "forecast": 0.9750000238418579,
+      "historical": 0.009999999776482582,
+      "market": 0.01600000075995922
+    },
+    "bucket_probs": [
+      0.0,
+      0.0003,
+      0.3229,
+      0.6702,
+      0.0066,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      32,
+      66,
+      1,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTPHX",
+    "city": "Phoenix",
+    "target_date": "2026-04-17",
+    "forecast_mean": 85.2,
+    "model1_mu": 85.7,
+    "model1_sigma": 0.77,
+    "model2_mu": 86.2,
+    "model2_sigma": 5.29,
+    "model3_mu": 82.7,
+    "model3_sigma": 2.28,
+    "ensemble_mu": 85.7,
+    "ensemble_sigma": 1.0,
+    "ci_90_low": 84.1,
+    "ci_90_high": 87.4,
+    "weights": {
+      "forecast": 0.9789999723434448,
+      "historical": 0.008999999612569809,
+      "market": 0.012000000104308128
+    },
+    "bucket_probs": [
+      0.0,
+      0.0,
+      0.2976,
+      0.7024,
+      0.0,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      29,
+      70,
+      1,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTOKC",
+    "city": "Oklahoma City",
+    "target_date": "2026-04-17",
+    "forecast_mean": 77.4,
+    "model1_mu": 78.0,
+    "model1_sigma": 2.09,
+    "model2_mu": 80.5,
+    "model2_sigma": 5.9,
+    "model3_mu": 76.8,
+    "model3_sigma": 2.14,
+    "ensemble_mu": 78.0,
+    "ensemble_sigma": 2.17,
+    "ci_90_low": 74.4,
+    "ci_90_high": 81.6,
+    "weights": {
+      "forecast": 0.9750000238418579,
+      "historical": 0.00800000037997961,
+      "market": 0.017000000923871994
+    },
+    "bucket_probs": [
+      0.0,
+      0.0047,
+      0.3822,
+      0.5915,
+      0.0216,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      37,
+      58,
+      2,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHDEN",
+    "city": "Denver",
+    "target_date": "2026-04-17",
+    "forecast_mean": 55.0,
+    "model1_mu": 57.3,
+    "model1_sigma": 3.38,
+    "model2_mu": 70.6,
+    "model2_sigma": 7.57,
+    "model3_mu": 55.1,
+    "model3_sigma": 2.85,
+    "ensemble_mu": 57.3,
+    "ensemble_sigma": 3.5,
+    "ci_90_low": 51.6,
+    "ci_90_high": 63.1,
+    "weights": {
+      "forecast": 0.9829999804496765,
+      "historical": 0.003000000026077032,
+      "market": 0.014000000432133675
+    },
+    "bucket_probs": [
+      0.0002,
+      0.0176,
+      0.2329,
+      0.525,
+      0.21,
+      0.0143
+    ],
+    "fair_values_cents": [
+      1,
+      2,
+      23,
+      52,
+      20,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTDC",
+    "city": "Washington DC",
+    "target_date": "2026-04-17",
+    "forecast_mean": 81.3,
+    "model1_mu": 81.8,
+    "model1_sigma": 1.42,
+    "model2_mu": 73.4,
+    "model2_sigma": 8.0,
+    "model3_mu": 80.2,
+    "model3_sigma": 2.6,
+    "ensemble_mu": 81.7,
+    "ensemble_sigma": 1.84,
+    "ci_90_low": 78.7,
+    "ci_90_high": 84.7,
+    "weights": {
+      "forecast": 0.9750000238418579,
+      "historical": 0.009999999776482582,
+      "market": 0.014999999664723873
+    },
+    "bucket_probs": [
+      0.0,
+      0.0016,
+      0.4054,
+      0.5864,
+      0.0066,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      40,
+      58,
+      1,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTSATX",
+    "city": "San Antonio",
+    "target_date": "2026-04-17",
+    "forecast_mean": 87.4,
+    "model1_mu": 88.2,
+    "model1_sigma": 2.04,
+    "model2_mu": 86.0,
+    "model2_sigma": 5.45,
+    "model3_mu": 87.3,
+    "model3_sigma": 2.89,
+    "ensemble_mu": 88.2,
+    "ensemble_sigma": 2.12,
+    "ci_90_low": 84.7,
+    "ci_90_high": 91.6,
+    "weights": {
+      "forecast": 0.9750000238418579,
+      "historical": 0.00800000037997961,
+      "market": 0.017000000923871994
+    },
+    "bucket_probs": [
+      0.0,
+      0.0031,
+      0.3516,
+      0.622,
+      0.0233,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      34,
+      61,
+      2,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTHOU",
+    "city": "Houston",
+    "target_date": "2026-04-17",
+    "forecast_mean": 83.6,
+    "model1_mu": 83.4,
+    "model1_sigma": 1.46,
+    "model2_mu": 83.8,
+    "model2_sigma": 4.73,
+    "model3_mu": 83.2,
+    "model3_sigma": 2.72,
+    "ensemble_mu": 83.4,
+    "ensemble_sigma": 1.55,
+    "ci_90_low": 80.8,
+    "ci_90_high": 85.9,
+    "weights": {
+      "forecast": 0.9750000238418579,
+      "historical": 0.009999999776482582,
+      "market": 0.014999999664723873
+    },
+    "bucket_probs": [
+      0.0,
+      0.001,
+      0.5562,
+      0.4424,
+      0.0004,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      55,
+      43,
+      1,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTMIN",
+    "city": "Minneapolis",
+    "target_date": "2026-04-17",
+    "forecast_mean": 67.3,
+    "model1_mu": 68.5,
+    "model1_sigma": 2.75,
+    "model2_mu": 71.5,
+    "model2_sigma": 8.45,
+    "model3_mu": 70.0,
+    "model3_sigma": 3.96,
+    "ensemble_mu": 68.6,
+    "ensemble_sigma": 2.85,
+    "ci_90_low": 63.9,
+    "ci_90_high": 73.3,
+    "weights": {
+      "forecast": 0.9789999723434448,
+      "historical": 0.004999999888241291,
+      "market": 0.01600000075995922
+    },
+    "bucket_probs": [
+      0.0,
+      0.0139,
+      0.315,
+      0.5763,
+      0.0936,
+      0.0011
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      31,
+      57,
+      9,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTATL",
+    "city": "Atlanta",
+    "target_date": "2026-04-17",
+    "forecast_mean": 86.1,
+    "model1_mu": 87.1,
+    "model1_sigma": 1.24,
+    "model2_mu": 80.0,
+    "model2_sigma": 5.78,
+    "model3_mu": 83.6,
+    "model3_sigma": 2.06,
+    "ensemble_mu": 86.9,
+    "ensemble_sigma": 1.58,
+    "ci_90_low": 84.3,
+    "ci_90_high": 89.5,
+    "weights": {
+      "forecast": 0.9760000109672546,
+      "historical": 0.009999999776482582,
+      "market": 0.014000000432133675
+    },
+    "bucket_probs": [
+      0.0,
+      0.0001,
+      0.3026,
+      0.6931,
+      0.0041,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      30,
+      69,
+      1,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTSEA",
+    "city": "Seattle",
+    "target_date": "2026-04-17",
+    "forecast_mean": 54.2,
+    "model1_mu": 53.7,
+    "model1_sigma": 1.44,
+    "model2_mu": 58.7,
+    "model2_sigma": 5.26,
+    "model3_mu": 53.9,
+    "model3_sigma": 2.5,
+    "ensemble_mu": 53.7,
+    "ensemble_sigma": 1.62,
+    "ci_90_low": 51.1,
+    "ci_90_high": 56.4,
+    "weights": {
+      "forecast": 0.9750000238418579,
+      "historical": 0.009999999776482582,
+      "market": 0.014999999664723873
+    },
+    "bucket_probs": [
+      0.0,
+      0.0026,
+      0.6146,
+      0.3825,
+      0.0003,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      61,
+      37,
+      1,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTLV",
+    "city": "Las Vegas",
+    "target_date": "2026-04-17",
+    "forecast_mean": 68.8,
+    "model1_mu": 69.9,
+    "model1_sigma": 1.11,
+    "model2_mu": 82.3,
+    "model2_sigma": 5.4,
+    "model3_mu": 68.9,
+    "model3_sigma": 2.7,
+    "ensemble_mu": 70.0,
+    "ensemble_sigma": 1.74,
+    "ci_90_low": 67.2,
+    "ci_90_high": 72.9,
+    "weights": {
+      "forecast": 0.9769999980926514,
+      "historical": 0.009999999776482582,
+      "market": 0.013000000268220901
+    },
+    "bucket_probs": [
+      0.0,
+      0.0002,
+      0.2344,
+      0.7495,
+      0.0159,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      23,
+      74,
+      2,
+      1
+    ]
+  },
+  {
+    "ticker": "KXHIGHTNOLA",
+    "city": "New Orleans",
+    "target_date": "2026-04-17",
+    "forecast_mean": 82.9,
+    "model1_mu": 83.9,
+    "model1_sigma": 1.3,
+    "model2_mu": 83.1,
+    "model2_sigma": 4.87,
+    "model3_mu": 82.2,
+    "model3_sigma": 2.24,
+    "ensemble_mu": 83.9,
+    "ensemble_sigma": 1.42,
+    "ci_90_low": 81.5,
+    "ci_90_high": 86.2,
+    "weights": {
+      "forecast": 0.9760000109672546,
+      "historical": 0.009999999776482582,
+      "market": 0.014000000432133675
+    },
+    "bucket_probs": [
+      0.0,
+      0.0,
+      0.2468,
+      0.751,
+      0.0022,
+      0.0
+    ],
+    "fair_values_cents": [
+      1,
+      1,
+      24,
+      74,
+      1,
+      1
+    ]
+  }
+]

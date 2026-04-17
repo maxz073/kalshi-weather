@@ -19,9 +19,9 @@ BOT_PORT = int(os.getenv("BOT_PORT", "8377"))  # port for the bot's control serv
 
 # ── Strategy parameters ──
 ENTRY_MIN = 92   # cents (YES price lower bound)
-ENTRY_MAX = 96   # cents (YES price upper bound)
+ENTRY_MAX = 97   # cents (YES price upper bound)
 ENTRY_HOUR_LOCAL = 16  # 4 PM local
-MAX_CONTRACTS = 50
+MAX_POSITION_SIZE = 50
 POLL_INTERVAL = 60  # 1 minute in seconds
 
 # ── Weather thresholds ──
@@ -54,7 +54,7 @@ CITIES = {
     "KXHIGHDEN":    ("Denver",          "US/Mountain",  39.74, -104.98),
     "KXHIGHTDC":    ("Washington DC",   "US/Eastern",   38.91, -77.04),
     "KXHIGHTSATX":  ("San Antonio",     "US/Central",   29.42, -98.49),
-    "KXHIGHHOU":    ("Houston",         "US/Central",   29.76, -95.37),
+    "KXHIGHTHOU":   ("Houston",         "US/Central",   29.76, -95.37),
     "KXHIGHTMIN":   ("Minneapolis",     "US/Central",   44.98, -93.27),
     "KXHIGHTATL":   ("Atlanta",         "US/Eastern",   33.75, -84.39),
     "KXHIGHTSEA":   ("Seattle",         "US/Pacific",   47.61, -122.33),
