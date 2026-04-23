@@ -133,7 +133,19 @@ def run_cycle(client: KalshiClient):
                 log.info("%-16s  skip — already at max position (%d) in %s", city_name, current_qty, ticker)
                 continue
 
-            # 7. Trade
+            # 7. Cap order size by available balance
+            if mode == "live":
+                balance_cents = client.get_balance().get("balance", 0)
+                cost_per_contract = yes_price + config.kalshi_taker_fee(yes_price, 1)
+                affordable = balance_cents // cost_per_contract if cost_per_contract > 0 else 0
+                if affordable <= 0:
+                    log.warning("%-16s  skip — insufficient balance (%d¢) for %s @ %d¢", city_name, balance_cents, ticker, yes_price)
+                    continue
+                if affordable < needed:
+                    log.warning("%-16s  capping order from %d to %d contracts (balance=%d¢)", city_name, needed, affordable, balance_cents)
+                    needed = affordable
+
+            # 8. Trade
             log.info(
                 "%-16s  ENTRY — %s  qty=%d (have %d, target %d)  price=%d¢  humidity=%.0f%%  cloud=%.0f%%",
                 city_name, ticker, needed, current_qty, config.MAX_POSITION_SIZE, yes_price, humidity, cloud_cover,
