@@ -114,7 +114,13 @@ def run_cycle(client: KalshiClient):
                 )
                 continue
 
-            # 5. Inventory check — buy only what's needed to reach MAX_POSITION_SIZE
+            # 5. Cancel any resting orders for this ticker to avoid double-sizing
+            if mode == "live":
+                cancelled = client.cancel_orders_for_ticker(ticker)
+                if cancelled:
+                    log.info("%-16s  cancelled %d resting order(s) for %s before re-entry", city_name, cancelled, ticker)
+
+            # 6. Inventory check — buy only what's needed to reach MAX_POSITION_SIZE
             positions = client.get_positions().get("market_positions", [])
             current_qty = 0
             for p in positions:
@@ -127,7 +133,7 @@ def run_cycle(client: KalshiClient):
                 log.info("%-16s  skip — already at max position (%d) in %s", city_name, current_qty, ticker)
                 continue
 
-            # 6. Trade
+            # 7. Trade
             log.info(
                 "%-16s  ENTRY — %s  qty=%d (have %d, target %d)  price=%d¢  humidity=%.0f%%  cloud=%.0f%%",
                 city_name, ticker, needed, current_qty, config.MAX_POSITION_SIZE, yes_price, humidity, cloud_cover,

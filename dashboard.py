@@ -194,7 +194,7 @@ def build_positions_panel(positions: list[dict], market_prices: dict, microprice
         ticker = pos.get("ticker", "?")
 
         # position_fp is positive for YES contracts, negative for NO
-        position_fp = int(float(pos.get("position_fp", 0)))
+        position_fp = float(pos.get("position_fp", 0))
         if not position_fp:
             continue  # no position
 
@@ -205,24 +205,9 @@ def build_positions_panel(positions: list[dict], market_prices: dict, microprice
             side = "NO"
             qty = abs(position_fp)
 
-        # market_exposure_dollars is the aggregate cost — normally in dollars,
-        # but the API sometimes returns values already in cents.  Detect by
-        # checking whether treating it as dollars would give an avg price
-        # outside the valid 0-100c range for a binary contract.
+        # market_exposure_dollars is the aggregate cost in dollars; convert to cents
         raw_exposure = float(pos.get("market_exposure_dollars", 0))
-        resting_cost_as_dollars = round(abs(raw_exposure) * 100)        # assume dollars → cents
-        resting_cost_as_cents   = round(abs(raw_exposure))              # assume already cents
-
-        if qty:
-            avg_if_dollars = resting_cost_as_dollars / qty
-            # If interpreting as dollars gives a per-contract price > $1 (100c),
-            # the value is already in cents.
-            if avg_if_dollars > 100:
-                resting_cost = resting_cost_as_cents
-            else:
-                resting_cost = resting_cost_as_dollars
-        else:
-            resting_cost = resting_cost_as_dollars
+        resting_cost = round(abs(raw_exposure) * 100)
 
         avg_price = resting_cost / qty if qty else 0
 

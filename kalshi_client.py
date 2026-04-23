@@ -174,6 +174,33 @@ class KalshiClient:
         data = self.get(f"/markets/{ticker}/orderbook")
         return data.get("orderbook", data)
 
+    def get_orders(self, ticker: str | None = None, status: str = "resting") -> list[dict]:
+        """Fetch orders, optionally filtered by ticker and status."""
+        params = {"limit": 200, "status": status}
+        if ticker:
+            params["ticker"] = ticker
+        data = self.get("/portfolio/orders", params=params)
+        return data.get("orders", [])
+
+    def cancel_order(self, order_id: str) -> dict:
+        """Cancel a single resting order by ID."""
+        return self.delete(f"/portfolio/orders/{order_id}")
+
+    def cancel_orders_for_ticker(self, ticker: str) -> int:
+        """Cancel all resting orders for a given ticker. Returns count cancelled."""
+        orders = self.get_orders(ticker=ticker, status="resting")
+        cancelled = 0
+        for order in orders:
+            order_id = order.get("order_id")
+            if order_id:
+                try:
+                    self.cancel_order(order_id)
+                    cancelled += 1
+                    log.info("Cancelled resting order %s for %s", order_id, ticker)
+                except Exception:
+                    log.exception("Failed to cancel order %s", order_id)
+        return cancelled
+
     def get_balance(self) -> dict:
         return self.get("/portfolio/balance")
 
