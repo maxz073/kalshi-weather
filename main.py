@@ -133,6 +133,9 @@ def run_cycle(client: KalshiClient):
                 log.info("%-16s  skip — already at max position (%d) in %s", city_name, current_qty, ticker)
                 continue
 
+            # 6b. Cap single order to MAX_ORDER_SIZE
+            needed = min(needed, config.MAX_ORDER_SIZE)
+
             # 7. Cap order size by available balance
             if mode == "live":
                 balance_cents = client.get_balance().get("balance", 0)

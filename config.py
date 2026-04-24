@@ -21,7 +21,8 @@ BOT_PORT = int(os.getenv("BOT_PORT", "8377"))  # port for the bot's control serv
 ENTRY_MIN = 92   # cents (YES price lower bound)
 ENTRY_MAX = 97   # cents (YES price upper bound)
 ENTRY_HOUR_LOCAL = 16  # 4 PM local
-MAX_POSITION_SIZE = 50
+MAX_POSITION_SIZE = 125  # Maximum contracts per event (across multiple sweeps)
+MAX_ORDER_SIZE = 75       # Maximum contracts per single order
 POLL_INTERVAL = 60  # 1 minute in seconds
 
 # ── Weather thresholds ──
